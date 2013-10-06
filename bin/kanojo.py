@@ -143,7 +143,7 @@ if __name__=='__main__':
 					str += '[![img](%s)](%s) '%(ab.l_box_image, ab.l_box_url)
 				str += ab.c_box_text
 				if ab.r_box_url != None:
-					str += ' [![img](%s)](%s)'%(ab.r_box_image, ab.r_box_url)
+					str += ' <div style="float: right">[![img](%s)](%s)</div>'%(ab.r_box_image, ab.r_box_url)
 				f.write('%s\n\n'%str)
 			f.close()
 
