@@ -9,16 +9,26 @@ import urllib
 import hashlib
 import os.path
 import datetime, pytz
+from imageshack import UploadToImageshack
+from settings import IS_KEY
 
 domain='www.barcodekanojo.com'
 server='http://%s'%domain
 
-def get_url(data):
+def get_url(data, isImage=False):
 	if data.find(domain) == -1:
 		data = server+data
-	return data
+	if not isImage:
+		return data
+	sti = UploadToImageshack(IS_KEY)
+	url = sti.upload(data)
+	if url == None:
+		url = sti.upload(data)
+		if url == None:
+			url = data
+	return url
 
-def html2string(tag):
+def html2markdown(tag):
 	# [Lemuel](http://www.barcodekanojo.com/user/399321/Lemuel) added [Junko](http://www.barcodekanojo.com/kanojo/2541211/Junko) to friend list.
 	# <a href="/user/399321/Lemuel">Lemuel</a> added <a href="/kanojo/2541211/Junko">Junko</a> to friend list.
 	for a in tag.xpath('.//a'):
@@ -70,7 +80,7 @@ class ActivityBlock(object):
 							if 'img' == el3.tag:
 								for attr in el3.items():
 									if 'src' == attr[0]:
-										self.l_box_image = get_url(attr[1])
+										self.l_box_image = get_url(attr[1], True)
 										break
 								break
 						break
@@ -84,7 +94,7 @@ class ActivityBlock(object):
 							if 'img' == el3.tag:
 								for attr in el3.items():
 									if 'src' == attr[0]:
-										self.r_box_image = get_url(attr[1])
+										self.r_box_image = get_url(attr[1], True)
 										break
 								break
 						break
@@ -93,7 +103,7 @@ class ActivityBlock(object):
 					if 'span' == el2.tag:
 						for attr in el2.items():
 							if 'id' == attr[0] and 'activity.message' == attr[1]:
-								self.c_box_text = html2string(el2)
+								self.c_box_text = html2markdown(el2)
 								break
 
 
@@ -140,12 +150,12 @@ if __name__=='__main__':
 				print ab.hash(), ab.c_box_text
 				str = ''
 				if ab.l_box_url != None:
-					str += '[![img](%s)](%s) '%(ab.l_box_image, ab.l_box_url)
-				str += ab.c_box_text
+					f.write('[![img](%s)](%s) '%(ab.l_box_image, ab.l_box_url))
+				f.write(ab.c_box_text)
 				if ab.r_box_url != None:
-					str += '[![img](%s)](%s) '%(ab.r_box_image, ab.r_box_url)
+					f.write('[![img](%s)](%s) '%(ab.r_box_image, ab.r_box_url))
 					#str += ' <div style="float: right">[![img](%s)](%s)</div>'%(ab.r_box_image, ab.r_box_url)
-				f.write('%s\n\n'%str)
+				f.write('\n\n')
 			f.close()
 
 			f = open(hash_file, 'w')
