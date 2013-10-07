@@ -9,6 +9,7 @@ import urllib
 import hashlib
 import os.path
 import datetime, pytz
+import re
 from imageshack import UploadToImageshack
 from settings import IS_KEY
 
@@ -22,10 +23,8 @@ def get_url(data, isImage=False):
 		return data
 	sti = UploadToImageshack(IS_KEY)
 	url = sti.upload(data)
-	if url == None:
-		url = sti.upload(data)
-		if url == None:
-			url = data
+	if url == False:
+		url = data
 	return url
 
 def html2markdown(tag):
@@ -60,6 +59,7 @@ class ActivityBlock(object):
 		self.r_box_image = None
 		self.r_box_url = None
 		self.c_box_text = None
+		self.time = None
 		if div_tag != None:
 			self.parse(div_tag)
 
@@ -99,12 +99,19 @@ class ActivityBlock(object):
 								break
 						break
 			if 'div' == el.tag and len(el.find_class('c_activities_box')) and el.find_class('c_activities_box')[0] == el:
+				r = re.compile('@[\D*](\d+)\s+(\w+)\s+ago')
 				for el2 in el.iterchildren():
 					if 'span' == el2.tag:
 						for attr in el2.items():
 							if 'id' == attr[0] and 'activity.message' == attr[1]:
 								self.c_box_text = html2markdown(el2)
 								break
+						m = r.search(el2.text.strip())
+						if m:
+							g = m.groups()
+							self.time = int(g[0])
+							if g[1][0] == 'm': self.time *= 60
+							if g[1][0] == 'h': self.time *= 60*60
 
 
 class Kanojo(object):
@@ -134,6 +141,7 @@ if __name__=='__main__':
 	html_data = get_data(server)
 	#html_data = open('index.html').read()
 
+	dt = datetime.datetime.now(pytz.timezone('Asia/Tokyo'))
 	last_msg_hash = None
 	hash_file = script_path+'/last_msg_hash'
 	if os.path.isfile(hash_file):
@@ -141,16 +149,21 @@ if __name__=='__main__':
 	if not isinstance(html_data, int):
 		kanojo = Kanojo(last_msg_hash)
 		msgs = kanojo.parse_data(html_data)
+		print len(msgs)
 		if len(msgs):
-			dt = datetime.datetime.now(pytz.timezone('Asia/Tokyo'))
 			fn = '/'.join(script_path.split('/')[:-1])+'/%s.md'%dt.strftime('%Y_%m_%d')
 
 			f = open(fn, 'a')
 			for ab in msgs:
-				print ab.hash(), ab.c_box_text
+				if ab.time:
+					tm = dt - datetime.timedelta(0, ab.time)
+					print ab.hash(), tm.strftime('%H:%M'), ab.c_box_text
 				str = ''
 				if ab.l_box_url != None:
 					f.write('[![img](%s)](%s) '%(ab.l_box_image, ab.l_box_url))
+				if ab.time:
+					tm = dt - datetime.timedelta(0, ab.time)
+					f.write(tm.strftime('%H:%M '))
 				f.write(ab.c_box_text)
 				if ab.r_box_url != None:
 					f.write('[![img](%s)](%s) '%(ab.r_box_image, ab.r_box_url))
