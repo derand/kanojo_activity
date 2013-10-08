@@ -98,11 +98,11 @@ class ActivityBlock(object):
 										break
 								break
 						break
-					if 'img' == el3.tag:
-						for attr in el3.items():
+					if 'img' == el2.tag:
+						for attr in el2.items():
 							if 'src' == attr[0]:
 								self.r_box_image = get_url(attr[1], True)
-								self.r_box_url = get_url(attr[1], False)
+								self.r_box_url = get_url(attr[1].split('?')[0], False)
 								break
 						break
 			if 'div' == el.tag and len(el.find_class('c_activities_box')) and el.find_class('c_activities_box')[0] == el:
