@@ -1,9 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-__version__ = '0.01'
+__version__ = '0.02'
 __copyright__ = 'Copyright © 2013'
 
+import sys
+try:
+	settings = __import__('settings')
+except ImportError:
+	print 'Error import module "settings", see settings.py.template'
+	sys.exit(1)
+IS_KEY = getattr(settings, 'IS_KEY')
+IMG_CACHE = getattr(settings, 'IMG_CACHE', {})
 import lxml.html
 import urllib
 import hashlib
@@ -11,44 +19,11 @@ import os.path
 import datetime, pytz
 import re
 from imageshack import UploadToImageshack
-from settings import IS_KEY
+
 
 domain='www.barcodekanojo.com'
 server='http://%s'%domain
 
-def get_url(data, isImage=False):
-	if data.find(domain) == -1:
-		data = server+data
-	if not isImage:
-		return data
-	sti = UploadToImageshack(IS_KEY)
-	url = sti.upload(data)
-	if url == False:
-		url = data
-	return url
-
-def html2markdown(tag):
-	# [Lemuel](http://www.barcodekanojo.com/user/399321/Lemuel) added [Junko](http://www.barcodekanojo.com/kanojo/2541211/Junko) to friend list.
-	# <a href="/user/399321/Lemuel">Lemuel</a> added <a href="/kanojo/2541211/Junko">Junko</a> to friend list.
-	for a in tag.xpath('.//a'):
-		url = ''
-		for attr in a.items():
-			if 'href' == attr[0]:
-				url = get_url(attr[1])
-				break
-		tmp = '[%s](%s)'%(a.text, url)
-		a.tail = tmp + a.tail if a.tail else tmp
-	lxml.etree.strip_elements(tag, 'a', with_tail=False)
-	s = lxml.etree.tostring(tag, encoding='utf-8', method='html').strip()
-	s = s[s.index('>')+1:s.rindex('<')]
-	return s
-
-def get_data(url):
-	page = urllib.urlopen(url)
-	code = page.getcode()
-	if code == 200:
-		return page.read()
-	return code
 
 class ActivityBlock(object):
 	"""docstring for ActivityBlock"""
@@ -68,6 +43,38 @@ class ActivityBlock(object):
 		m.update(self.c_box_text)
 		return m.hexdigest()
 
+	def __prepare_url(self, data, isImage=False):
+		if data.find(domain) == -1:
+			data = server+data
+		if not isImage:
+			return data
+		if IMG_CACHE.has_key(data):
+			return IMG_CACHE[data]
+		sti = UploadToImageshack(IS_KEY)
+		url = sti.upload(data)
+		if url == False:
+			# try again :)
+			url = sti.upload(data)
+			if url == False:
+				url = 'http://i.imgur.com/WR0naKP.jpg'
+		return url
+
+	def html2markdown(self, tag):
+		# [Lemuel](http://www.barcodekanojo.com/user/399321/Lemuel) added [Junko](http://www.barcodekanojo.com/kanojo/2541211/Junko) to friend list.
+		# <a href="/user/399321/Lemuel">Lemuel</a> added <a href="/kanojo/2541211/Junko">Junko</a> to friend list.
+		for a in tag.xpath('.//a'):
+			url = ''
+			for attr in a.items():
+				if 'href' == attr[0]:
+					url = self.__prepare_url(attr[1], False)
+					break
+			tmp = '[%s](%s)'%(a.text, url)
+			a.tail = tmp + a.tail if a.tail else tmp
+		lxml.etree.strip_elements(tag, 'a', with_tail=False)
+		s = lxml.etree.tostring(tag, encoding='utf-8', method='html').strip()
+		s = s[s.index('>')+1:s.rindex('<')]
+		return s
+
 	def parse(self, div_tag):
 		for el in div_tag.iterchildren():
 			if 'div' == el.tag and len(el.find_class('l_activities_box')) and el.find_class('l_activities_box')[0] == el:
@@ -75,12 +82,12 @@ class ActivityBlock(object):
 					if 'a' == el2.tag:
 						for attr in el2.items():
 							if 'href' == attr[0]:
-								self.l_box_url = get_url(attr[1])
+								self.l_box_url = self.__prepare_url(attr[1], False)
 						for el3 in el2.iterchildren():
 							if 'img' == el3.tag:
 								for attr in el3.items():
 									if 'src' == attr[0]:
-										self.l_box_image = get_url(attr[1], True)
+										self.l_box_image = self.__prepare_url(attr[1], True)
 										break
 								break
 						break
@@ -89,20 +96,20 @@ class ActivityBlock(object):
 					if 'a' == el2.tag:
 						for attr in el2.items():
 							if 'href' == attr[0]:
-								self.r_box_url = get_url(attr[1])
+								self.r_box_url = self.__prepare_url(attr[1], False)
 						for el3 in el2.iterchildren():
 							if 'img' == el3.tag:
 								for attr in el3.items():
 									if 'src' == attr[0]:
-										self.r_box_image = get_url(attr[1], True)
+										self.r_box_image = self.__prepare_url(attr[1], True)
 										break
 								break
 						break
 					if 'img' == el2.tag:
 						for attr in el2.items():
 							if 'src' == attr[0]:
-								self.r_box_image = get_url(attr[1], True)
-								self.r_box_url = get_url(attr[1].split('?')[0], False)
+								self.r_box_image = self.__prepare_url(attr[1], True)
+								self.r_box_url = self.__prepare_url(attr[1].split('?')[0], False)
 								break
 						break
 			if 'div' == el.tag and len(el.find_class('c_activities_box')) and el.find_class('c_activities_box')[0] == el:
@@ -111,14 +118,17 @@ class ActivityBlock(object):
 					if 'span' == el2.tag:
 						for attr in el2.items():
 							if 'id' == attr[0] and 'activity.message' == attr[1]:
-								self.c_box_text = html2markdown(el2)
+								self.c_box_text = self.html2markdown(el2)
 								break
 						m = r.search(el2.text.strip())
 						if m:
 							g = m.groups()
 							self.time = int(g[0])
-							if g[1][0] == 'm': self.time *= 60
-							if g[1][0] == 'h': self.time *= 60*60
+							if g[1][0:1] == 'mi': self.time *= 60
+							if g[1][0]   == 'h': self.time *= 60*60
+							if g[1][0]   == 'd': self.time *= 24*60*60
+							if g[1][0]   == 'w': self.time *= 7*24*60*60
+							if g[1][0:1] == 'mo': self.time *= 30*24*60*60
 
 
 class Kanojo(object):
@@ -141,20 +151,31 @@ class Kanojo(object):
 		activities.reverse()
 		return activities
 
+	def get_htmldata(self, url):
+		page = urllib.urlopen(url)
+		code = page.getcode()
+		if code == 200:
+			return page.read()
+		return code
+
 
 if __name__=='__main__':
 	script_path = os.path.dirname(os.path.realpath(__file__))
 
-	html_data = get_data(server)
-	#html_data = open('index.html').read()
+	#print len(sys.argv)
+	#sys.exit()
 
 	dt = datetime.datetime.now(pytz.timezone('Asia/Tokyo'))
 	last_msg_hash = None
 	hash_file = script_path+'/last_msg_hash'
 	if os.path.isfile(hash_file):
 		last_msg_hash = open(hash_file).read()
+
+	kanojo = Kanojo(last_msg_hash)
+	html_data = kanojo.get_htmldata(server)
+	#html_data = open('index.html').read()
+
 	if not isinstance(html_data, int):
-		kanojo = Kanojo(last_msg_hash)
 		msgs = kanojo.parse_data(html_data)
 		print len(msgs)
 		if len(msgs):
@@ -174,7 +195,6 @@ if __name__=='__main__':
 				f.write(ab.c_box_text)
 				if ab.r_box_url != None:
 					f.write('[![img](%s)](%s) '%(ab.r_box_image, ab.r_box_url))
-					#str += ' <div style="float: right">[![img](%s)](%s)</div>'%(ab.r_box_image, ab.r_box_url)
 				f.write('\n\n')
 			f.close()
 
