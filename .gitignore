@@ -5,5 +5,7 @@ settings.py
 # python compiled files #
 *.pyc
 
-# store #
+# temp files #
 store/
+src/last_msg_hash
+
