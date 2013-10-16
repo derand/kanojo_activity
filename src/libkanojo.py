@@ -1,17 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-__version__ = '0.02'
+__version__ = '0.03'
 __copyright__ = 'Copyright © 2013'
 
 import sys
-try:
-	settings = __import__('settings')
-except ImportError:
-	print 'Error import module "settings", see settings.py.template'
-	sys.exit(1)
-IS_KEY = getattr(settings, 'IS_KEY')
-IMG_CACHE = getattr(settings, 'IMG_CACHE', {})
 import lxml.html
 import urllib
 import hashlib
@@ -21,13 +14,9 @@ import re
 from imageshack import UploadToImageshack
 
 
-domain='www.barcodekanojo.com'
-server='http://%s'%domain
-
-
 class ActivityBlock(object):
 	"""docstring for ActivityBlock"""
-	def __init__(self, div_tag=None):
+	def __init__(self, div_tag=None, IS_KEY='', IMG_CACHE={}, domain=''):
 		super(ActivityBlock, self).__init__()
 		self.l_box_image = None
 		self.l_box_url = None
@@ -35,6 +24,9 @@ class ActivityBlock(object):
 		self.r_box_url = None
 		self.c_box_text = None
 		self.time = None
+		self.IS_KEY = IS_KEY
+		self.IMG_CACHE = IMG_CACHE
+		self.domain = domain
 		if div_tag != None:
 			self.parse(div_tag)
 
@@ -44,13 +36,13 @@ class ActivityBlock(object):
 		return m.hexdigest()
 
 	def __prepare_url(self, data, isImage=False):
-		if data.find(domain) == -1:
-			data = server+data
+		if data.find(self.domain) == -1:
+			data = 'http://%s'%self.domain+data
 		if not isImage:
 			return data
-		if IMG_CACHE.has_key(data):
-			return IMG_CACHE[data]
-		sti = UploadToImageshack(IS_KEY)
+		if self.IMG_CACHE.has_key(data):
+			return self.IMG_CACHE[data]
+		sti = UploadToImageshack(self.IS_KEY)
 		url = sti.upload(data)
 		if url == False:
 			# try again :)
@@ -124,19 +116,22 @@ class ActivityBlock(object):
 						if m:
 							g = m.groups()
 							self.time = int(g[0])
-							if g[1][0:1] == 'mi': self.time *= 60
+							if g[1][0:2] == 'mi': self.time *= 60
 							if g[1][0]   == 'h': self.time *= 60*60
 							if g[1][0]   == 'd': self.time *= 24*60*60
 							if g[1][0]   == 'w': self.time *= 7*24*60*60
-							if g[1][0:1] == 'mo': self.time *= 30*24*60*60
+							if g[1][0:2] == 'mo': self.time *= 30*24*60*60
 
 
 class Kanojo(object):
 	"""docstring for Kanojo"""
-	def __init__(self, last_id=None):
+	def __init__(self, last_msg_hash=None):
 		super(Kanojo, self).__init__()
 		self.doc = None
-		self.last_id = last_id
+		self.last_msg_hash = last_msg_hash
+		self.IS_KEY = None
+		self.IMG_CACHE = None
+		self.domain = 'www.barcodekanojo.com'
 
 	def parse_data(self, html_data):
 		self.doc = lxml.html.document_fromstring(html_data)
@@ -144,8 +139,8 @@ class Kanojo(object):
 		activities = []
 		for el in start_activity_block.iterchildren():
 			if 'div' == el.tag and el.find_class('activities_box')[0] == el:
-				ab = ActivityBlock(el)
-				if ab.hash() == self.last_id:
+				ab = ActivityBlock(el, self.IS_KEY, self.IMG_CACHE, self.domain)
+				if ab.hash() == self.last_msg_hash:
 					break
 				activities.append(ab)
 		activities.reverse()
@@ -158,12 +153,17 @@ class Kanojo(object):
 			return page.read()
 		return code
 
-
+# download all activities
 if __name__=='__main__':
-	script_path = os.path.dirname(os.path.realpath(__file__))
+	try:
+		settings = __import__('settings')
+	except ImportError:
+		print 'Error import module "settings", see settings.py.template'
+		sys.exit(1)
+	IS_KEY = getattr(settings, 'IS_KEY')
+	IMG_CACHE = getattr(settings, 'IMG_CACHE', {})
 
-	#print len(sys.argv)
-	#sys.exit()
+	script_path = os.path.dirname(os.path.realpath(__file__))
 
 	dt = datetime.datetime.now(pytz.timezone('Asia/Tokyo'))
 	last_msg_hash = None
@@ -172,7 +172,9 @@ if __name__=='__main__':
 		last_msg_hash = open(hash_file).read()
 
 	kanojo = Kanojo(last_msg_hash)
-	html_data = kanojo.get_htmldata(server)
+	kanojo.IS_KEY = IS_KEY;
+	kanojo.IMG_CACHE = IMG_CACHE
+	html_data = kanojo.get_htmldata('http://%s'%kanojo.domain)
 	#html_data = open('index.html').read()
 
 	if not isinstance(html_data, int):

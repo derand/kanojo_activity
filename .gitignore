@@ -8,4 +8,5 @@ settings.py
 # temp files #
 hidden/
 src/last_msg_hash
+src/status.json
 
