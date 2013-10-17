@@ -63,7 +63,7 @@ if __name__=='__main__':
 			msgs = kanojo.parse_data(html_data)
 			print len(msgs)
 			if len(msgs):
-				fn = usr_dir + '/%s.md'%dt.strftime('%Y_%m_%d')
+				fn = usr_dir + '/%s_%s.md'%(usr_name, dt.strftime('%Y_%m_%d'))
 
 				f = open(fn, 'a')
 				for ab in msgs:
