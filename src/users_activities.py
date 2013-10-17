@@ -6,6 +6,7 @@ __version__ = '0.01'
 __copyright__ = 'Copyright © 2013'
 
 
+import sys
 try:
 	settings = __import__('settings')
 except ImportError:
@@ -18,17 +19,22 @@ import os.path
 import datetime, pytz
 from libkanojo import ActivityBlock, Kanojo
 import json
-
+import os
 
 domain='www.barcodekanojo.com'
 server='http://%s'%domain
 
 
-def user_worker():
-	pass
-
-
 if __name__=='__main__':
+	# check if script alredy running
+	pid = str(os.getpid())
+	pidfile = "/tmp/kanojo_user_activities.pid"
+	if os.path.isfile(pidfile):
+		print "%s already exists, exiting" % pidfile
+		sys.exit()
+	else:
+		file(pidfile, 'w').write(pid)
+
 	script_path = os.path.dirname(os.path.realpath(__file__))
 
 	status_fn = script_path + '/status.json'
@@ -45,7 +51,10 @@ if __name__=='__main__':
 	kanojo.IMG_CACHE = IMG_CACHE
 	for usr in USERS:
 		dt = datetime.datetime.now(pytz.timezone('Asia/Tokyo'))
-		usr_name = usr['url'].split('/')[-1]
+		if usr.has_key('username'):
+			usr_name = usr['username']
+		else:
+			usr_name = usr['url'].split('/')[-1]
 		print usr_name
 		html_data = kanojo.get_htmldata(usr['url'])
 		#html_data = open('Lemuel').read()
@@ -88,3 +97,5 @@ if __name__=='__main__':
 	f = open(status_fn, 'w')
 	f.write(status_str.encode('utf-8'))
 	f.close()
+
+	os.unlink(pidfile)
