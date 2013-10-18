@@ -30,10 +30,12 @@ if __name__=='__main__':
 	pid = str(os.getpid())
 	pidfile = "/tmp/kanojo_user_activities.pid"
 	if os.path.isfile(pidfile):
-		print "%s already exists, exiting" % pidfile
-		sys.exit()
-	else:
-		file(pidfile, 'w').write(pid)
+		pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
+		if file(pidfile).read() in pids:
+			print "%s already exists, exiting" % pidfile
+			sys.exit()
+	
+	file(pidfile, 'w').write(pid)
 
 	script_path = os.path.dirname(os.path.realpath(__file__))
 
