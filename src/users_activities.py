@@ -31,9 +31,12 @@ if __name__=='__main__':
 	pidfile = "/tmp/kanojo_user_activities.pid"
 	if os.path.isfile(pidfile):
 		pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
-		if file(pidfile).read() in pids:
-			print "%s already exists, exiting" % pidfile
-			sys.exit()
+		last_pid = file(pidfile).read()
+		if last_pid in pids:
+			fn = '/proc/%s/cmdline'%last_pid
+			if os.path.isfile(fn) and file(fn).read()==file('/proc/%s/cmdline'%pid).read():
+				print "%s already exists, exiting" % pidfile
+				sys.exit()
 	
 	file(pidfile, 'w').write(pid)
 
