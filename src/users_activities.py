@@ -26,8 +26,13 @@ server='http://%s'%domain
 
 
 if __name__=='__main__':
+	script_path = os.path.dirname(os.path.realpath(__file__))
+
+	log = file('%s/../../kanojo.log'%script_path, 'a+')
+
 	# check if script alredy running
 	pid = str(os.getpid())
+	log.write('%s\t%s\n'%(pid, file('/proc/%s/cmdline'%pid).read()))
 	pidfile = "/tmp/kanojo_user_activities.pid"
 	if os.path.isfile(pidfile):
 		pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
@@ -39,8 +44,6 @@ if __name__=='__main__':
 				sys.exit()
 	
 	file(pidfile, 'w').write(pid)
-
-	script_path = os.path.dirname(os.path.realpath(__file__))
 
 	status_fn = script_path + '/status.json'
 	status = {}
