@@ -32,7 +32,7 @@ if __name__=='__main__':
 
 	# check if script alredy running
 	pid = str(os.getpid())
-	log.write('%s\t%s\n'%(pid, file('/proc/%s/cmdline'%pid).read()))
+	log.write('%s\t%s'%(pid, file('/proc/%s/cmdline'%pid).read()))
 	pidfile = "/tmp/kanojo_user_activities.pid"
 	if os.path.isfile(pidfile):
 		pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
@@ -41,7 +41,10 @@ if __name__=='__main__':
 			fn = '/proc/%s/cmdline'%last_pid
 			if os.path.isfile(fn) and file(fn).read()==file('/proc/%s/cmdline'%pid).read():
 				print "%s already exists, exiting" % pidfile
+				log.write('\t--- %s\t%s\n'%(file(last_pid, fn).read()))
 				sys.exit()
+	log.write('\n')
+	log.close()
 	
 	file(pidfile, 'w').write(pid)
 
