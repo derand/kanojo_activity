@@ -9,4 +9,5 @@ settings.py
 hidden/
 src/last_msg_hash
 src/status.json
+src/*.html
 
