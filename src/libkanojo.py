@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-__version__ = '0.03'
+__version__ = '0.04'
 __copyright__ = 'Copyright © 2013'
 
 import sys
@@ -122,6 +122,15 @@ class ActivityBlock(object):
 							if g[1][0]   == 'w': self.time *= 7*24*60*60
 							if g[1][0:2] == 'mo': self.time *= 30*24*60*60
 
+class KanojoInfo(object):
+	"""docstring for KanojoInfo"""
+	def __init__(self):
+		super(KanojoInfo, self).__init__()
+		self.name = None
+		self.steady_name = ''
+		self.steady_id = None
+		self.followers_ids = []
+
 
 class Kanojo(object):
 	"""docstring for Kanojo"""
@@ -152,6 +161,33 @@ class Kanojo(object):
 		if code == 200:
 			return page.read()
 		return code
+
+	def parse_kanojo(self, html_data):
+		rv = KanojoInfo()
+		kanojo_doc = lxml.html.document_fromstring(html_data)
+		main_content_block = kanojo_doc.get_element_by_id('maincontent', None)
+		if main_content_block != None:
+			for el in main_content_block.xpath('./h1'):
+				for attr in el.items():
+					if 'class' == attr[0] and 'name_kanojo' == attr[1]:
+						rv.name = el.text
+						break
+			tbl = main_content_block.xpath('./table/tr/td/table')
+			if len(tbl)>0:
+				tbl = tbl[0]
+				usr = tbl.xpath('./tr[4]/td[2]/div/a')[0].get('href').split('/')
+				rv.steady_id = int(usr[2])
+				rv.steady_name = '/'.join(usr[3:])
+			# followers
+			for el in main_content_block.iterchildren():
+				if 'span' == el.tag:
+					tmp = el.xpath('./span/a')
+					if len(tmp):
+						usr = tmp[0].get('href')
+						rv.followers_ids.append(int(usr.split('/')[2]))
+		return rv
+
+
 
 # download all activities
 if __name__=='__main__':
