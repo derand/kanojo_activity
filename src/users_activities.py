@@ -80,7 +80,7 @@ if __name__=='__main__':
 				kanojo.last_msg_hash = status[usr['url']]['last_msg_hash']
 			else:
 				kanojo.last_msg_hash = None
-			msgs = kanojo.parse_data(html_data)
+			msgs = kanojo.parse_activities(html_data)
 			print len(msgs)
 			if len(msgs):
 				fn = usr_dir + '/%s_%s.md'%(usr_name, dt.strftime('%Y_%m_%d'))

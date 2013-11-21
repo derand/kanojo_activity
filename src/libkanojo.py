@@ -133,7 +133,7 @@ class Kanojo(object):
 		self.IMG_CACHE = None
 		self.domain = 'www.barcodekanojo.com'
 
-	def parse_data(self, html_data):
+	def parse_activities(self, html_data):
 		self.doc = lxml.html.document_fromstring(html_data)
 		start_activity_block = self.doc.get_element_by_id('activityBlock', None)
 		activities = []
@@ -178,7 +178,7 @@ if __name__=='__main__':
 	#html_data = open('index.html').read()
 
 	if not isinstance(html_data, int):
-		msgs = kanojo.parse_data(html_data)
+		msgs = kanojo.parse_activities(html_data)
 		print len(msgs)
 		if len(msgs):
 			fn = '/'.join(script_path.split('/')[:-1])+'/%s.md'%dt.strftime('%Y_%m_%d')
