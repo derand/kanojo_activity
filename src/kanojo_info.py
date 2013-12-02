@@ -36,7 +36,7 @@ if __name__=='__main__':
 		s = ''
 		if info.steady_id == SELECTED_USER_ID:
 			s = '\033[1;32m%s\033[00m'%k['ean']
-		elif info.steady_id in FRIENDS_USER_IDS or k.has_key('steady') and k['steady'] == info.steady_id:
+		elif info.steady_id in FRIENDS_USER_IDS or (k.has_key('steady') and ((isinstance(k['steady'], int) and k['steady'] == info.steady_id) or (isinstance(k['steady'], list) and info.steady_id in k['steady'])) ):
 			#s = '\033[1;36m%d\033[00m'%k['ean']
 			s = '%s'%k['ean']
 		else:
