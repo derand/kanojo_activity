@@ -20,6 +20,7 @@ import datetime, pytz
 from libkanojo import ActivityBlock, Kanojo
 import json
 import os
+from time import localtime, strftime
 
 domain='www.barcodekanojo.com'
 server='http://%s'%domain
@@ -32,7 +33,8 @@ if __name__=='__main__':
 
 	# check if script alredy running
 	pid = str(os.getpid())
-	log.write('%s\t%s'%(pid, file('/proc/%s/cmdline'%pid).read()))
+
+	log.write('%s\t%s\t%s'%(strftime("%Y-%m-%d %H:%M:%S", localtime()), pid, file('/proc/%s/cmdline'%pid).read()))
 	pidfile = "/tmp/kanojo_user_activities.pid"
 	if os.path.isfile(pidfile):
 		pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
@@ -42,6 +44,7 @@ if __name__=='__main__':
 			if os.path.isfile(fn) and file(fn).read()==file('/proc/%s/cmdline'%pid).read():
 				print "%s already exists, exiting" % pidfile
 				log.write('\t--- %s\t%s\n'%(last_pid, file(fn).read()))
+				log.close()
 				sys.exit()
 	log.write('\n')
 	log.close()
