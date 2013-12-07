@@ -41,7 +41,7 @@ if __name__=='__main__':
 			fn = '/proc/%s/cmdline'%last_pid
 			if os.path.isfile(fn) and file(fn).read()==file('/proc/%s/cmdline'%pid).read():
 				print "%s already exists, exiting" % pidfile
-				log.write('\t--- %s\t%s\n'%(file(last_pid, fn).read()))
+				log.write('\t--- %s\t%s\n'%(last_pid, file(fn).read()))
 				sys.exit()
 	log.write('\n')
 	log.close()
