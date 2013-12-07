@@ -38,7 +38,7 @@ if __name__=='__main__':
 	log.write('%s\t%s\t%s'%(strftime("%Y-%m-%d %H:%M:%S", localtime()), pid, cmd1))
 	pidfile = "/tmp/kanojo_user_activities.pid"
 	if os.path.isfile(pidfile):
-		pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
+		pids = [p for p in os.listdir('/proc') if p.isdigit()]
 		last_pid = file(pidfile).read()
 		if last_pid in pids:
 			fn = '/proc/%s/cmdline'%last_pid
