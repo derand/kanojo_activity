@@ -12,8 +12,8 @@ class UploadToImageshack(object):
 		self.key = IS_key
 
 	def parseXML(self, xml):
-		xmldoc = minidom.parse(StringIO(xml))
 		try:
+			xmldoc = minidom.parse(StringIO(xml))
 			rv = xmldoc.getElementsByTagName("image_link")[0].firstChild.data
 		except IndexError:
 			rv = False
