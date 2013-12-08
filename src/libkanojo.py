@@ -49,7 +49,7 @@ class ActivityBlock(object):
 			g = m.groups()
 			usr_id = g[0]
 		if usr_id and self.IMG_CACHE.has_key(usr_id):
-			if isinstance(self.IMG_CACHE[usr_id], hash):
+			if isinstance(self.IMG_CACHE[usr_id], dict):
 				if self.update_cache:
 					if self.IMG_CACHE[usr_id].has_key('counter'):
 						self.IMG_CACHE[usr_id]['counter'] = self.IMG_CACHE[usr_id]['counter']+1
