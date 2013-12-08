@@ -11,12 +11,13 @@ import hashlib
 import os.path
 import datetime, pytz
 import re
+import time
 from imageshack import UploadToImageshack
 
 
 class ActivityBlock(object):
 	"""docstring for ActivityBlock"""
-	def __init__(self, div_tag=None, IS_KEY='', IMG_CACHE={}, domain=''):
+	def __init__(self, div_tag=None, IS_KEY='', IMG_CACHE={}, domain='', update_cache=False):
 		super(ActivityBlock, self).__init__()
 		self.l_box_image = None
 		self.l_box_url = None
@@ -27,6 +28,7 @@ class ActivityBlock(object):
 		self.IS_KEY = IS_KEY
 		self.IMG_CACHE = IMG_CACHE
 		self.domain = domain
+		self.update_cache = update_cache
 		if div_tag != None:
 			self.parse(div_tag)
 
@@ -47,10 +49,27 @@ class ActivityBlock(object):
 			g = m.groups()
 			usr_id = g[0]
 		if usr_id and self.IMG_CACHE.has_key(usr_id):
-			return self.IMG_CACHE[usr_id]
+			if isinstance(self.IMG_CACHE[usr_id], hash):
+				if self.update_cache:
+					if self.IMG_CACHE[usr_id].has_key('counter'):
+						self.IMG_CACHE[usr_id]['counter'] = self.IMG_CACHE[usr_id]['counter']+1
+					else:
+						self.IMG_CACHE[usr_id]['counter'] = 1
+					self.IMG_CACHE[usr_id]['time'] = time.time()
+				if self.IMG_CACHE[usr_id].has_key('url'):
+					return self.IMG_CACHE[usr_id]['url']
+			else:
+				return self.IMG_CACHE[usr_id]
 		sti = UploadToImageshack(self.IS_KEY)
 		url = sti.upload(data)
-		if url == False:
+		if url:
+			if usr_id and self.update_cache and not self.IMG_CACHE.has_key(usr_id):
+				self.IMG_CACHE[usr_id] = {
+					'url': url,
+					'counter': 0,
+					'time': time.time()
+				}
+		else:
 			# try again :)
 			url = sti.upload(data)
 			if url == False:
@@ -146,6 +165,7 @@ class Kanojo(object):
 		self.last_msg_hash = last_msg_hash
 		self.IS_KEY = None
 		self.IMG_CACHE = None
+		self.update_cache = False
 		self.domain = 'www.barcodekanojo.com'
 
 	def parse_activities(self, html_data):
@@ -154,7 +174,7 @@ class Kanojo(object):
 		activities = []
 		for el in start_activity_block.iterchildren():
 			if 'div' == el.tag and el.find_class('activities_box')[0] == el:
-				ab = ActivityBlock(el, self.IS_KEY, self.IMG_CACHE, self.domain)
+				ab = ActivityBlock(el, IS_KEY=self.IS_KEY, IMG_CACHE=self.IMG_CACHE, domain=self.domain, update_cache=self.update_cache)
 				if ab.hash() == self.last_msg_hash:
 					break
 				activities.append(ab)

@@ -62,6 +62,10 @@ if __name__=='__main__':
 	if not os.path.exists(users_dir):
 		os.makedirs(users_dir)
 
+	cache_fn = script_path + '/cache.json'
+	if os.path.exists(cache_fn):
+		IMG_CACHE = json.loads(open(cache_fn, 'r').read())
+
 	kanojo = Kanojo()
 	kanojo.IS_KEY = IS_KEY;
 	kanojo.IMG_CACHE = IMG_CACHE

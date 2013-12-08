@@ -15,7 +15,9 @@ class UploadToImageshack(object):
 		try:
 			xmldoc = minidom.parse(StringIO(xml))
 			rv = xmldoc.getElementsByTagName("image_link")[0].firstChild.data
-		except IndexError:
+			#except IndexError:
+			#	rv = False
+		except:
 			rv = False
 		return rv
 

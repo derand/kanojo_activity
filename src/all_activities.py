@@ -16,6 +16,7 @@ IMG_CACHE = getattr(settings, 'IMG_CACHE', {})
 import os.path
 import datetime, pytz
 from libkanojo import ActivityBlock, Kanojo
+import json
 
 
 domain='www.barcodekanojo.com'
@@ -31,9 +32,18 @@ if __name__=='__main__':
 	if os.path.isfile(hash_file):
 		last_msg_hash = open(hash_file).read()
 
+	cache_fn = script_path + '/cache.json'
+	if os.path.exists(cache_fn):
+		IMG_CACHE = json.loads(open(cache_fn, 'r').read())
+	else:
+		for key in IMG_CACHE.keys():
+			IMG_CACHE[key] = { 'url': IMG_CACHE[key], }
+
 	kanojo = Kanojo(last_msg_hash)
 	kanojo.IS_KEY = IS_KEY;
+	kanojo.update_cache = True
 	kanojo.IMG_CACHE = IMG_CACHE
+
 	html_data = kanojo.get_htmldata(server)
 	#html_data = open('index.html').read()
 
@@ -63,3 +73,8 @@ if __name__=='__main__':
 			f = open(hash_file, 'w')
 			f.write(msgs[-1].hash())
 			f.close()
+
+	cache_str = json.dumps(IMG_CACHE, sort_keys=True, indent=4, separators=(',', ': '))
+	f = open(cache_fn, 'w')
+	f.write(cache_str.encode('utf-8'))
+	f.close()
