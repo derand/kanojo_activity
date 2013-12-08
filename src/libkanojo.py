@@ -40,8 +40,14 @@ class ActivityBlock(object):
 			data = 'http://%s'%self.domain+data
 		if not isImage:
 			return data
-		if self.IMG_CACHE.has_key(data):
-			return self.IMG_CACHE[data]
+		usr_id = None
+		r = re.compile('profile_images\/user\/(\d+)\/')
+		m = r.search(data)
+		if m:
+			g = m.groups()
+			usr_id = g[0]
+		if usr_id and self.IMG_CACHE.has_key(usr_id):
+			return self.IMG_CACHE[usr_id]
 		sti = UploadToImageshack(self.IS_KEY)
 		url = sti.upload(data)
 		if url == False:
