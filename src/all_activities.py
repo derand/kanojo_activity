@@ -19,6 +19,7 @@ from libkanojo import ActivityBlock, Kanojo
 import json
 import os
 from time import localtime, strftime, time
+import random
 
 domain='www.barcodekanojo.com'
 server='http://%s'%domain
@@ -76,6 +77,15 @@ if __name__=='__main__':
 			f = open(hash_file, 'w')
 			f.write(msgs[-1].hash())
 			f.close()
+
+	if random.randrange(15) == 0:
+		barrier_time = time() - 60*60*24
+		for key in IMG_CACHE.keys():
+			if IMG_CACHE[key].has_key('time'):
+				if barrier_time > IMG_CACHE[key]['time']: 
+					del IMG_CACHE[key]
+			else:
+				del IMG_CACHE[key]
 
 	cache_str = json.dumps(IMG_CACHE, sort_keys=True, indent=4, separators=(',', ': '))
 	f = open(cache_fn, 'w')
