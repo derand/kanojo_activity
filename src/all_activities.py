@@ -13,17 +13,20 @@ except ImportError:
 	sys.exit(1)
 IS_KEY = getattr(settings, 'IS_KEY')
 IMG_CACHE = getattr(settings, 'IMG_CACHE', {})
-import os.path
+WRITE_LOG = getattr(settings, 'WRITE_LOG', False)
 import datetime, pytz
 from libkanojo import ActivityBlock, Kanojo
 import json
-
+import os
+from time import localtime, strftime, time
 
 domain='www.barcodekanojo.com'
 server='http://%s'%domain
 
 
 if __name__=='__main__':
+	start_time = time()
+
 	script_path = os.path.dirname(os.path.realpath(__file__))
 
 	dt = datetime.datetime.now(pytz.timezone('Asia/Tokyo'))
@@ -78,3 +81,12 @@ if __name__=='__main__':
 	f = open(cache_fn, 'w')
 	f.write(cache_str.encode('utf-8'))
 	f.close()
+
+	if WRITE_LOG:
+		log = file('%s/kanojo.log'%script_path, 'a+')
+		pid = os.getpid()
+		cmd1 = file('/proc/%d/cmdline'%pid).read()
+		log.write('%s\t%d\t%s'%(strftime("%Y-%m-%d %H:%M:%S", localtime()), pid, cmd1))
+		log.write('\ttime: %.2fsec'%(time()-start_time))
+		log.write('\n')
+		log.close()

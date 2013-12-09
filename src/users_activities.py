@@ -15,6 +15,7 @@ except ImportError:
 IS_KEY = getattr(settings, 'IS_KEY')
 IMG_CACHE = getattr(settings, 'IMG_CACHE', {})
 USERS = getattr(settings, 'USERS', [])
+WRITE_LOG = getattr(settings, 'WRITE_LOG', False)
 import os.path
 import datetime, pytz
 from libkanojo import ActivityBlock, Kanojo
@@ -29,13 +30,16 @@ server='http://%s'%domain
 if __name__=='__main__':
 	script_path = os.path.dirname(os.path.realpath(__file__))
 
-	log = file('%s/../../kanojo.log'%script_path, 'a+')
+
+	if WRITE_LOG:
+		log = file('%s/kanojo.log'%script_path, 'a+')
 
 	# check if script alredy running
 	pid = str(os.getpid())
 
 	cmd1 = file('/proc/%s/cmdline'%pid).read()
-	log.write('%s\t%s\t%s'%(strftime("%Y-%m-%d %H:%M:%S", localtime()), pid, cmd1))
+	if WRITE_LOG:
+		log.write('%s\t%s\t%s'%(strftime("%Y-%m-%d %H:%M:%S", localtime()), pid, cmd1))
 	pidfile = "/tmp/kanojo_user_activities.pid"
 	if os.path.isfile(pidfile):
 		pids = [p for p in os.listdir('/proc') if p.isdigit()]
@@ -45,11 +49,13 @@ if __name__=='__main__':
 			cmd2 = file(fn).read()
 			if os.path.isfile(fn) and cmd1==cmd2 and pid<>last_pid:
 				print "%s already exists, exiting" % pidfile
-				log.write('\t--- parent: %s\t<%s>\n'%(last_pid, cmd2))
-				log.close()
+				if WRITE_LOG:
+					log.write('\t--- parent: %s\t<%s>\n'%(last_pid, cmd2))
+					log.close()
 				sys.exit()
-	log.write('\n')
-	log.close()
+	if WRITE_LOG:
+		log.write('\n')
+		log.close()
 	
 	file(pidfile, 'w').write(pid)
 
