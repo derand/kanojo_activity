@@ -155,6 +155,7 @@ class KanojoInfo(object):
 		self.steady_name = ''
 		self.steady_id = None
 		self.followers_ids = []
+		self.life = '-1%'
 
 
 class Kanojo(object):
@@ -198,12 +199,19 @@ class Kanojo(object):
 					if 'class' == attr[0] and 'name_kanojo' == attr[1]:
 						rv.name = el.text
 						break
+			#//*[@id="maincontent"]/table/tbody/tr/td[2]/table/tbody/tr[4]/td[2]/div/a
+			#//*[@id="maincontent"]/table/tbody/tr/td[2]/table/tbody/tr[5]/td[2]/div/img
 			tbl = main_content_block.xpath('./table/tr/td/table')
 			if len(tbl)>0:
 				tbl = tbl[0]
-				usr = tbl.xpath('./tr[4]/td[2]/div/a')[0].get('href').split('/')
-				rv.steady_id = int(usr[2])
-				rv.steady_name = '/'.join(usr[3:])
+				tmp = tbl.xpath('./tr[4]/td[2]/div/a')
+				if len(tmp):
+					usr = tmp[0].get('href').split('/')
+					rv.steady_id = int(usr[2])
+					rv.steady_name = '/'.join(usr[3:])
+				tmp = tbl.xpath('./tr[5]/div/td/div/img')
+				if len(tmp):
+					rv.life = tbl.xpath('./tr[5]/div/td/div/img')[0].get('width')
 			# followers
 			for el in main_content_block.iterchildren():
 				if 'span' == el.tag:
