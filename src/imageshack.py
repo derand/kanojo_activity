@@ -13,6 +13,7 @@ class UploadToImageshack(object):
 
 	def parseXML(self, xml):
 		try:
+			print xml
 			xmldoc = minidom.parse(StringIO(xml))
 			rv = xmldoc.getElementsByTagName("image_link")[0].firstChild.data
 			#except IndexError:
@@ -34,7 +35,6 @@ class UploadToImageshack(object):
 		try:
 			curl.perform()
 		except pycurl.error:
-			print 'asd'
 			print pycurl.error
 			return False
 		return self.parseXML(buf.getvalue().strip())
