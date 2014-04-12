@@ -34,6 +34,8 @@ class UploadToImageshack(object):
 		try:
 			curl.perform()
 		except pycurl.error:
+			print 'asd'
+			print pycurl.error
 			return False
 		return self.parseXML(buf.getvalue().strip())
 
