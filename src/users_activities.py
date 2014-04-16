@@ -74,6 +74,7 @@ if __name__=='__main__':
 
 	kanojo = Kanojo()
 	kanojo.IS_KEY = IS_KEY;
+	kanojo.update_cache = True
 	kanojo.IMG_CACHE = IMG_CACHE
 	for usr in USERS:
 		dt = datetime.datetime.now(pytz.timezone('Asia/Tokyo'))
