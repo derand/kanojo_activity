@@ -14,6 +14,7 @@ import re
 import time
 from imageshack import UploadToImageshack
 from gdrive_cdn import UploadToCDN
+from deviantsart_cdn import UploadToDeviantsart
 
 
 class ActivityBlock(object):
@@ -73,7 +74,8 @@ class ActivityBlock(object):
 			else:
 				return self.IMG_CACHE[usr_id]
 		#sti = UploadToImageshack(self.IS_KEY)
-		sti = UploadToCDN(self.IS_KEY)
+		#sti = UploadToCDN(self.IS_KEY)
+		sti = UploadToDeviantsart()
 		url = sti.upload(src_url)
 		if url:
 			if usr_id and self.update_cache and not self.IMG_CACHE.has_key(usr_id):

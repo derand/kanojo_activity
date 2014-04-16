@@ -17,22 +17,26 @@ class UploadToDeviantsart(object):
 			return False
 			#curl.setopt(pycurl.HTTPPOST, [('fileupload', (pycurl.FORM_FILE, file_path_or_url)), ('format', 'xml'), ('key', self.key)])
 		elif 'http' == file_path_or_url[:4]:
+			#print file_path_or_url
 			boundary = "----------------------------25bebba7cefe"
 			disposition = 'Content-Disposition: form-data; name="%s"'
-			form_dict = {
-				'file': urllib2.urlopen(file_path_or_url).read(),
-				#'s': 'Upload'
-			}
 			try:
 				conn = urllib2.urlopen(file_path_or_url)
 			except urllib2.HTTPError:
 				return False
+			content_type = conn.info().getheader('Content-Type')
+			if content_type[:len('image')] != 'image':
+				return False
+			ext = content_type.split('/')[-1]
 			lines = []
 			lines.append('--' + boundary)
-			lines.append('Content-Disposition: form-data; name="file"; filename="test"')
-			lines.append('Content-Type: %s' % conn.info().getheader('Content-Type'))
+			lines.append('Content-Disposition: form-data; name="file"; filename="test_file.%s"'%ext)
+			lines.append('Content-Type: %s' % content_type)
 			lines.append('')
-			lines.append(conn.read())
+			try:
+				lines.append(conn.read())
+			except:
+				return False
 			#for k, v in form_dict.iteritems():
 			#	lines.append('--' + boundary)
 			#	lines.append(disposition % k)
@@ -50,8 +54,8 @@ class UploadToDeviantsart(object):
 				return False
 			r = conn.read()
 			try:
-				rv = json.load(r)
-			except:
+				rv = json.loads(r)
+			except ValueError:
 				return False
 			return rv.get('url', False)
 		return False
