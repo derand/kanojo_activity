@@ -3,7 +3,6 @@
 
 from sys import argv
 from StringIO import StringIO
-from xml.dom import minidom
 import pycurl, os
 import json
 
