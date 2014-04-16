@@ -22,6 +22,7 @@ from libkanojo import ActivityBlock, Kanojo
 import json
 import os
 from time import localtime, strftime
+import random
 
 domain='www.barcodekanojo.com'
 server='http://%s'%domain
@@ -69,8 +70,13 @@ if __name__=='__main__':
 		os.makedirs(users_dir)
 
 	cache_fn = script_path + '/cache.json'
+	cache_ex_fn = script_path + '/cache_ex.json'
 	if os.path.exists(cache_fn):
 		IMG_CACHE = json.loads(open(cache_fn, 'r').read())
+	img_cache_copy = IMG_CACHE.copy()
+	if os.path.exists(cache_ex_fn):
+		tmp = loads(open(cache_fn, 'r').read())
+		IMG_CACHE.update(tmp)
 
 	kanojo = Kanojo()
 	kanojo.IS_KEY = IS_KEY;
@@ -124,5 +130,22 @@ if __name__=='__main__':
 	f = open(status_fn, 'w')
 	f.write(status_str.encode('utf-8'))
 	f.close()
+
+	for key in img_cache_copy.keys():
+		IMG_CACHE.pop(key, None)
+	if random.randrange(15) == 0:
+		barrier_time = time() - 60*60*24
+		for key in IMG_CACHE.keys():
+			if IMG_CACHE[key].has_key('time'):
+				if barrier_time > IMG_CACHE[key]['time']: 
+					del IMG_CACHE[key]
+			else:
+				del IMG_CACHE[key]
+	cache_str = json.dumps(IMG_CACHE, sort_keys=True, indent=4, separators=(',', ': '))
+	cache_ex_fn = script_path + '/cache_ex.json'
+	f = open(cache_ex_fn, 'w')
+	f.write(cache_str.encode('utf-8'))
+	f.close()
+
 
 	os.unlink(pidfile)

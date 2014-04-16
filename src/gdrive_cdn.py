@@ -13,7 +13,10 @@ class UploadToCDN(object):
 		self.key = IS_key
 
 	def getLink(self, json_str):
-		tmp = json.loads(json_str)
+		try:
+			tmp = json.loads(json_str)
+		except ValueError:
+			return False
 		return tmp.get('url', False)
 
 	def upload(self, file_path_or_url):
