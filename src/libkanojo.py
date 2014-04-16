@@ -39,8 +39,17 @@ class ActivityBlock(object):
 		return m.hexdigest()
 
 	def __prepare_url(self, data, isImage=False):
+		'''
+			http://www.barcodekanojo.com/profile_images/kanojo/2890681/1397673056/50x50xHors.png,qw=88,ah=88,aface=true.pagespeed.ic.WxA3iTfrxh.png
+		'''
 		if data.find(self.domain) == -1:
 			data = 'http://%s'%self.domain+data
+		if isImage:
+			idx = data.find(',')
+			if idx > 0:
+				data_tmp = data[:idx].replace('50x50x', '')
+				if data_tmp[-1] != '/':
+					data = data_tmp
 		return data
 
 	def __copy_img(self, src_url):
