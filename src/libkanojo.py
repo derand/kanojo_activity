@@ -44,6 +44,7 @@ class ActivityBlock(object):
 		'''
 		if data.find(self.domain) == -1:
 			data = 'http://%s'%self.domain+data
+		return data
 		if isImage:
 			idx = data.find(',')
 			if idx > 0:
