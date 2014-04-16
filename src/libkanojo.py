@@ -41,11 +41,12 @@ class ActivityBlock(object):
 	def __prepare_url(self, data, isImage=False):
 		if data.find(self.domain) == -1:
 			data = 'http://%s'%self.domain+data
-		if not isImage:
-			return data
+		return data
+
+	def __copy_img(self, src_url):
 		usr_id = None
 		r = re.compile('profile_images\/user\/(\d+)\/')
-		m = r.search(data)
+		m = r.search(src_url)
 		if m:
 			g = m.groups()
 			usr_id = g[0]
@@ -63,7 +64,7 @@ class ActivityBlock(object):
 				return self.IMG_CACHE[usr_id]
 		#sti = UploadToImageshack(self.IS_KEY)
 		sti = UploadToCDN(self.IS_KEY)
-		url = sti.upload(data)
+		url = sti.upload(src_url)
 		if url:
 			if usr_id and self.update_cache and not self.IMG_CACHE.has_key(usr_id):
 				self.IMG_CACHE[usr_id] = {
@@ -73,10 +74,16 @@ class ActivityBlock(object):
 				}
 		else:
 			# try again :)
-			url = sti.upload(data)
+			url = sti.upload(src_url)
 			if url == False:
 				url = 'http://i.imgur.com/WR0naKP.jpg'
 		return url
+
+	def copy_imgs(self):
+		if self.l_box_image:
+			self.l_box_image = self.__copy_img(self.l_box_image)
+		if self.r_box_image:
+			self.r_box_image = self.__copy_img(self.r_box_image)
 
 	def html2markdown(self, tag):
 		# [Lemuel](http://www.barcodekanojo.com/user/399321/Lemuel) added [Junko](http://www.barcodekanojo.com/kanojo/2541211/Junko) to friend list.
@@ -180,6 +187,7 @@ class Kanojo(object):
 				ab = ActivityBlock(el, IS_KEY=self.IS_KEY, IMG_CACHE=self.IMG_CACHE, domain=self.domain, update_cache=self.update_cache)
 				if ab.hash() == self.last_msg_hash:
 					break
+				ab.copy_imgs()
 				activities.append(ab)
 		activities.reverse()
 		return activities
