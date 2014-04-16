@@ -13,6 +13,7 @@ import datetime, pytz
 import re
 import time
 from imageshack import UploadToImageshack
+from gdrive_cdn import UploadToCDN
 
 
 class ActivityBlock(object):
@@ -60,7 +61,8 @@ class ActivityBlock(object):
 					return self.IMG_CACHE[usr_id]['url']
 			else:
 				return self.IMG_CACHE[usr_id]
-		sti = UploadToImageshack(self.IS_KEY)
+		#sti = UploadToImageshack(self.IS_KEY)
+		sti = UploadToCDN(self.IS_KEY)
 		url = sti.upload(data)
 		if url:
 			if usr_id and self.update_cache and not self.IMG_CACHE.has_key(usr_id):
