@@ -74,7 +74,7 @@ class ActivityBlock(object):
 			else:
 				return self.IMG_CACHE[usr_id]
 		#sti = UploadToImageshack(self.IS_KEY)
-		#sti = UploadToCDN(self.IS_KEY)
+		#sti = UploadToCDN()
 		sti = UploadToDeviantsart()
 		url = sti.upload(src_url)
 		if url:
@@ -85,8 +85,8 @@ class ActivityBlock(object):
 					'time': time.time()
 				}
 		else:
-			# try again :)
-			url = sti.upload(src_url)
+			# if can't upload try another cdn
+			url = UploadToCDN().upload(src_url)
 			if url == False:
 				url = 'http://i.imgur.com/WR0naKP.jpg'
 		return url
