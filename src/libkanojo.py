@@ -42,16 +42,21 @@ class ActivityBlock(object):
 	def __prepare_url(self, data, isImage=False):
 		'''
 			http://www.barcodekanojo.com/profile_images/kanojo/2890681/1397673056/50x50xHors.png,qw=88,ah=88,aface=true.pagespeed.ic.WxA3iTfrxh.png
+			http://www.barcodekanojo.com/profile_images/user/445543/1396835017/50x50xAntuaneten.jpg,qw=88,ah=88.pagespeed.ic.OUxW8WYlsH.jpg
+			http://www.barcodekanojo.com/profile_images/user/445543/1396835017/Antuaneten.jpg?w=88&h=88
 		'''
 		if data.find(self.domain) == -1:
 			data = 'http://%s'%self.domain+data
-		return data
+		#return data
 		if isImage:
 			idx = data.find(',')
-			if idx > 0:
-				data_tmp = data[:idx].replace('50x50x', '')
-				if data_tmp[-1] != '/':
-					data = data_tmp
+			if idx > 0 and data.find('/50x50x') > 0:
+				data_tmp = data[:idx].replace('/50x50x', '/')
+				if data_tmp[-1] == '/':
+					name = data[idx:].split('.')
+					if len(name) > 2:
+						data_tmp += name[-2] + '.' + name[-1]
+				data = data_tmp + '?w=88&h=88'
 		return data
 
 	def __copy_img(self, src_url):

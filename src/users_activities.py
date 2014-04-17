@@ -75,7 +75,7 @@ if __name__=='__main__':
 		IMG_CACHE = json.loads(open(cache_fn, 'r').read())
 	img_cache_copy = IMG_CACHE.copy()
 	if os.path.exists(cache_ex_fn):
-		tmp = loads(open(cache_fn, 'r').read())
+		tmp = json.loads(open(cache_fn, 'r').read())
 		IMG_CACHE.update(tmp)
 
 	kanojo = Kanojo()
