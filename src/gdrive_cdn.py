@@ -7,9 +7,8 @@ import pycurl, os
 import json
 
 class UploadToCDN(object):
-	def __init__(self, IS_key):
+	def __init__(self):
 		super(UploadToCDN, self).__init__()
-		self.key = IS_key
 
 	def getLink(self, json_str):
 		try:
@@ -21,22 +20,24 @@ class UploadToCDN(object):
 	def upload(self, file_path_or_url):
 		curl = pycurl.Curl()
 		curl.setopt(pycurl.URL, 'http://gdrive-cdn.herokuapp.com/upload')
+		#curl.setopt(pycurl.URL, 'http://cdn.derand.net/upload')
+		#curl.setopt(pycurl.URL, 'http://127.0.0.1:5000/upload')
 		curl.setopt(pycurl.POST, 1)
 		if os.path.isfile(file_path_or_url):
-			return False
-			#curl.setopt(pycurl.HTTPPOST, [('fileupload', (pycurl.FORM_FILE, file_path_or_url)), ('format', 'xml'), ('key', self.key)])
+			curl.setopt(pycurl.HTTPPOST, [('file', (pycurl.FORM_FILE, file_path_or_url))])
 		elif 'http' == file_path_or_url[:4]:
-			curl.setopt(pycurl.HTTPPOST, [('url', file_path_or_url), ('key', self.key)])
+			#curl.setopt(pycurl.HTTPPOST, [('url', file_path_or_url), ('key', self.key)])
+			curl.setopt(pycurl.HTTPPOST, [('url', file_path_or_url)])
 		buf = StringIO()
 		curl.setopt(pycurl.WRITEFUNCTION, buf.write)
 		try:
 			curl.perform()
-		except pycurl.error:
+		except pycurl.error as e:
+			print 'asd', e
 			return False
 		return self.getLink(buf.getvalue().strip())
 
 if __name__=='__main__':
-	from settings import IS_KEY
-	sti = UploadToCDN(IS_KEY)
+	sti = UploadToCDN()
 	output = sti.upload(argv[1])
 	print output
