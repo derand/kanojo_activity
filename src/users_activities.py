@@ -21,7 +21,7 @@ import datetime, pytz
 from libkanojo import ActivityBlock, Kanojo
 import json
 import os
-from time import localtime, strftime
+from time import localtime, strftime, time
 import random
 
 domain='www.barcodekanojo.com'
