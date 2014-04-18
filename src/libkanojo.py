@@ -56,7 +56,10 @@ class ActivityBlock(object):
 					name = data[idx:].split('.')
 					if len(name) > 2:
 						data_tmp += name[-2] + '.' + name[-1]
-				data = data_tmp + '?w=88&h=88'
+				add = '?w=88&h=88'
+				if data.find('aface=true') > 0:
+					add += '&face=true'
+				data = data_tmp + add
 		return data
 
 	def __copy_img(self, src_url):

@@ -33,7 +33,6 @@ class UploadToCDN(object):
 		try:
 			curl.perform()
 		except pycurl.error as e:
-			print 'asd', e
 			return False
 		return self.getLink(buf.getvalue().strip())
 
