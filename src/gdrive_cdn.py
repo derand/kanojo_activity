@@ -21,7 +21,7 @@ class UploadToCDN(object):
 		curl = pycurl.Curl()
 		curl.setopt(pycurl.URL, 'http://gdrive-cdn.herokuapp.com/upload')
 		#curl.setopt(pycurl.URL, 'http://cdn.derand.net/upload')
-		#curl.setopt(pycurl.URL, 'http://127.0.0.1:5000/upload')
+		#curl.setopt(pycurl.URL, 'http://localhost:5000/upload')
 		curl.setopt(pycurl.POST, 1)
 		if os.path.isfile(file_path_or_url):
 			curl.setopt(pycurl.HTTPPOST, [('file', (pycurl.FORM_FILE, file_path_or_url))])
