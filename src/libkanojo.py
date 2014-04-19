@@ -51,6 +51,7 @@ class ActivityBlock(object):
 		if isImage:
 			idx = data.find(',')
 			if idx > 0 and data.find('/50x50x') > 0:
+				ext = '.'+data.split('.')[-1]
 				data_tmp = data[:idx].replace('/50x50x', '/')
 				if data_tmp[-1] == '/':
 					name = data[idx:].split('.')
@@ -59,6 +60,10 @@ class ActivityBlock(object):
 				add = '?w=88&h=88'
 				if data.find('aface=true') > 0:
 					add += '&face=true'
+				if data_tmp[:len(ext)] is not ext:
+					add = ext + add
+				with open('/home/pi/share/translate.log', 'a') as myfile:
+				    myfile.write(data + ' --> ' + (data_tmp + add) + '\n')
 				data = data_tmp + add
 		return data
 
