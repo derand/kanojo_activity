@@ -97,6 +97,9 @@ class ActivityBlock(object):
 			url = UploadToCDN().upload(src_url)
 			if url == False:
 				url = 'http://i.imgur.com/WR0naKP.jpg'
+		if '23q3t7f' in url:
+			with open('/home/pi/share/error.log', 'a') as myfile:
+			    myfile.write(src_url)
 		return url
 
 	def copy_imgs(self):
