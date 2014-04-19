@@ -99,7 +99,7 @@ class ActivityBlock(object):
 				url = 'http://i.imgur.com/WR0naKP.jpg'
 		if '23q3t7f' in url:
 			with open('/home/pi/share/error.log', 'a') as myfile:
-			    myfile.write(src_url)
+			    myfile.write(src_url+'\n')
 		return url
 
 	def copy_imgs(self):
