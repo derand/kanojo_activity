@@ -60,7 +60,7 @@ class ActivityBlock(object):
 				add = '?w=88&h=88'
 				if data.find('aface=true') > 0:
 					add += '&face=true'
-				if data_tmp[:len(ext)] is not ext:
+				if data_tmp[-len(ext):] != ext:
 					add = ext + add
 				with open('/home/pi/share/translate.log', 'a') as myfile:
 				    myfile.write(data + ' --> ' + (data_tmp + add) + '\n')
