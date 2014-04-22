@@ -62,8 +62,8 @@ class ActivityBlock(object):
 					add += '&face=true'
 				if data_tmp[-len(ext):] != ext:
 					add = ext + add
-				with open('/home/pi/share/translate.log', 'a') as myfile:
-				    myfile.write(data + ' --> ' + (data_tmp + add) + '\n')
+				#with open('/home/pi/share/translate.log', 'a') as myfile:
+				#	myfile.write(data + ' --> ' + (data_tmp + add) + '\n')
 				data = data_tmp + add
 		return data
 
@@ -102,9 +102,9 @@ class ActivityBlock(object):
 			url = UploadToCDN().upload(src_url)
 			if url == False:
 				url = 'http://i.imgur.com/WR0naKP.jpg'
-		if '23q3t7f' in url:
-			with open('/home/pi/share/error.log', 'a') as myfile:
-			    myfile.write(src_url+'\n')
+		#if '23q3t7f' in url:
+		#	with open('/home/pi/share/error.log', 'a') as myfile:
+		#		myfile.write(src_url+'\n')
 		return url
 
 	def copy_imgs(self):
