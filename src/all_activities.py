@@ -56,8 +56,13 @@ if __name__=='__main__':
 		print len(msgs)
 		if len(msgs):
 			fn = '/'.join(script_path.split('/')[:-1])+'/%s.md'%dt.strftime('%Y_%m_%d')
+			ex = os.path.isfile(fn)
 
 			f = open(fn, 'a')
+
+			if not ex:
+				f.write('![img](http://gdrive-cdn.herokuapp.com/get/0B-nxIpt4DE2TdGhPalFPcFpSY0E/512px-barcode.png)\n\n')
+
 			for ab in msgs:
 				if ab.time:
 					tm = dt - datetime.timedelta(0, ab.time)
