@@ -237,6 +237,10 @@ class Kanojo(object):
 					if 'class' == attr[0] and 'name_kanojo' == attr[1]:
 						rv.name = el.text
 						break
+			profile_img = main_content_block.xpath('./table/tr/td/div/img')
+			if len(profile_img):
+				profile_img = profile_img[0].get('src')
+				rv.kid = int(profile_img.split('/')[5])
 			#//*[@id="maincontent"]/table/tbody/tr/td[2]/table/tbody/tr[4]/td[2]/div/a
 			#//*[@id="maincontent"]/table/tbody/tr/td[2]/table/tbody/tr[5]/td[2]/div/img
 			tbl = main_content_block.xpath('./table/tr/td/table')

@@ -45,4 +45,5 @@ if __name__=='__main__':
 			s += '\033[1;32m [OK]\033[00m'
 		else:
 			s += '\033[1;31m [nFOUND]\033[00m'
-		print '\t%s\t\033[1;33m%s\033[00m\t%s\t%s'%(s, info.name, info.life, info.steady_name)
+		name_id = '%s(%d)'%(info.name, info.kid)
+		print '\t%s\t\033[1;33m%s\033[00m\t%s\t%s'%(s, name_id.ljust(10), info.life, info.steady_name)
