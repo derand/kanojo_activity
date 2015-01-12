@@ -61,7 +61,7 @@ if __name__=='__main__':
 			f = open(fn, 'a')
 
 			if not ex:
-				f.write('![img](http://gdrive-cdn.herokuapp.com/get/0B-nxIpt4DE2TdGhPalFPcFpSY0E/512px-barcode.png)\n\n')
+				f.write('![img](http://gdrive-cdn.herokuapp.com/537b65a5bc09f0000721dda7/512px-barcode.png)\n\n')
 
 			for ab in msgs:
 				if ab.time:
