@@ -10,7 +10,7 @@ try:
 	settings = __import__('settings')
 except ImportError:
 	print 'Error import module "settings", see settings.py.template'
-	sys.exit(1)
+	exit(1)
 IS_KEY = getattr(settings, 'IS_KEY')
 IMG_CACHE = getattr(settings, 'IMG_CACHE', {})
 WRITE_LOG = getattr(settings, 'WRITE_LOG', False)
